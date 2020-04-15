@@ -5,6 +5,7 @@ import json
 app = Flask(__name__)
 client = datastore.Client()
 
+# get all existing boats
 def get_all_boats(base_url):
     query = client.query(kind='Boat')
     results = list(query.fetch())
@@ -13,6 +14,7 @@ def get_all_boats(base_url):
         e["self"] = base_url + '/' + str(e.key.id)
     return results
 
+# create a new boat with name, type and length passed as parameters
 def add_boat(boat_name, boat_type, boat_length):
     new_boat = datastore.Entity(key=client.key('Boat'))
     new_boat.update({
@@ -23,6 +25,7 @@ def add_boat(boat_name, boat_type, boat_length):
     client.put(new_boat)
     return new_boat
 
+# get an existing boat with given boat id
 def get_boat(boat_id, base_url):
     boat_key = client.key('Boat', int(boat_id))
     result = client.get(key=boat_key)
@@ -31,6 +34,7 @@ def get_boat(boat_id, base_url):
         result["self"] = base_url
     return result
 
+# modify an existing boat with name, type and length passed as parameters
 def edit_boat(boat_name, boat_type, boat_length, boat_id):
     boat_key = client.key('Boat', int(boat_id))
     boat = client.get(key=boat_key)
@@ -43,15 +47,33 @@ def edit_boat(boat_name, boat_type, boat_length, boat_id):
         client.put(boat)
     return boat
 
+# check is boat is assigned to a slip
+def boat_assigned(boat_id):
+    query = client.query(kind='Slip')
+    slips = query.fetch()
+    for slip in slips:
+        if str(slip["current_boat"]) == boat_id:
+            return slip
+    return None
+
+# delete boat and remove it's id from slip if it is assigned to
 def delete_boat(boat_id):
     boat_key = client.key('Boat', int(boat_id))
     result = client.get(key=boat_key)
     if result is not None:
         client.delete(boat_key)
+        slip = boat_assigned(boat_id)
+        print(slip)
+        if slip is not None:
+            slip.update({
+                "current_boat": None
+            })
+            client.put(slip)
         return 204
     else:
         return 404
 
+# get all existing slips
 def get_all_slips(base_url):
     query = client.query(kind='Slip')
     results = list(query.fetch())
@@ -60,6 +82,7 @@ def get_all_slips(base_url):
         e["self"] = base_url + '/' + str(e.key.id)
     return results
 
+# create a new slip with number passed as parameter
 def add_slip(slip_number):
     new_slip = datastore.Entity(key=client.key('Slip'))
     new_slip.update({
@@ -69,6 +92,7 @@ def add_slip(slip_number):
     client.put(new_slip)
     return new_slip
 
+# get an existing slip with given slip id
 def get_slip(slip_id, base_url):
     slip_key = client.key('Slip', int(slip_id))
     result = client.get(key=slip_key)
@@ -77,6 +101,7 @@ def get_slip(slip_id, base_url):
         result["self"] = base_url
     return result
 
+# delete a slip
 def delete_slip(slip_id):
     slip_key = client.key('Slip', int(slip_id))
     result = client.get(key=slip_key)
@@ -86,39 +111,32 @@ def delete_slip(slip_id):
     else:
         return 404
 
-# check is boat is assigned to a slip
-def boat_assigned(boat_id):
-    query = client.query(kind='Slip')
-    slips = query.fetch()
-    for slip in slips:
-        if slip["current_boat"] == boat_id:
-            return True
-    return False
-
+# assign an existing boat to an existing slip
 def add_boat_to_slip(slip_id, boat_id):
     slip_key = client.key('Slip', int(slip_id))
     boat_key = client.key('Boat', int(boat_id))
     slip = client.get(key=slip_key)
     boat = client.get(key=boat_key)
     # check if both slip and boat exist and slip is not occupied
-    if slip is not None and boat is not None and slip["current_boat"] is None and not boat_assigned(boat_id):
+    if slip is None or boat is None:
+        return 404
+    elif slip["current_boat"] is not None: #or boat_assigned(boat_id) is not None:
+        return 403
+    else:
         slip.update({
-            "current_boat": boat_id
+            "current_boat": int(boat_id)
         })
         client.put(slip)
         return 204
-    elif slip["current_boat"] is not None or boat_assigned(boat_id):
-        return 403
-    else:
-        return 404
 
+# remove an existing boat from the slip it is assigned to
 def remove_boat_from_slip(slip_id, boat_id):
     slip_key = client.key('Slip', int(slip_id))
     boat_key = client.key('Boat', int(boat_id))
     slip = client.get(key=slip_key)
     boat = client.get(key=boat_key)
     # check if both slip and boat exist and slip is occupied by boat
-    if slip is not None and boat is not None and slip["current_boat"]==boat_id:
+    if slip is not None and boat is not None and str(slip["current_boat"])==boat_id:
         slip.update({
             "current_boat": None
         })
@@ -165,11 +183,13 @@ def boat_get_edit(boat_id):
         if 'name' not in content or 'type' not in content or 'length' not in content:
             error_message = {"Error": "The request object is missing at least one of the required attributes"}
             return (error_message, 400)
-        boat = edit_boat(content["name"], content["type"], int(content["length"]), boat_id)
-        if boat is None:
+        updated_boat = edit_boat(content["name"], content["type"], int(content["length"]), boat_id)
+        if updated_boat is None:
             error_message = {"Error": "No boat with this boat_id exists"}
             return (error_message, 404)
-        return Response(json.dumps(boat), status=200, mimetype='application/json')
+        updated_boat["id"] = boat_id
+        updated_boat["self"] = request.base_url
+        return Response(json.dumps(updated_boat), status=200, mimetype='application/json')
     elif request.method == 'DELETE':
         status = delete_boat(boat_id)
         if status == 404:
@@ -224,10 +244,10 @@ def slip_boat_edit(slip_id, boat_id):
     if request.method == 'PUT':
         status = add_boat_to_slip(slip_id, boat_id)
         if status == 403:
-            error_message = {"Error": "The slip is not empty or boat is already assigned"}
+            error_message = {"Error": "The slip is not empty"}
             return (error_message, 403)
         elif status == 404:
-            error_message = {"Error":  "The specified boat and/or slip don’t exist"}
+            error_message = {"Error":  "The specified boat and/or slip don\u2019t exist"}
             return (error_message, 404)
         elif status == 204:
             return ('', 204)
@@ -244,3 +264,6 @@ def slip_boat_edit(slip_id, boat_id):
 # main function
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
+
+
+
