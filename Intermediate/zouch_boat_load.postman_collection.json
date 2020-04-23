@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "1f236fe1-6fcf-4b5e-80c0-04e781794dc9",
-		"name": "hw3-marina",
-		"description": "This collection tests the API specification given for Assignment 3.\nIn order to run this collection, you need an environment which has the following 3 environment variables pre-defined:\n\napp_url\n- Set this to your app. E.g., when running locally set it to http://localhost:8080. When running the app on GCP. set it to https://myapp.appsport.com\n\ninvalid_boat_id\n- Set it to a value that's not an ID of any boat in your project. I have set it to 1 and that should work for you as well.\n- \n\ninvalid_slip_id\n- Set it to a value that's not an ID of any slip in your porject. I have set it to 1 and that should work for you as well.\n",
+		"name": "hw4-intermediateAPI",
+		"description": "This collection tests the API specification for Assignment 4.\nIn order to run this collection, you need an environment which has the following 3 environment variables pre-defined:\n\napp_url\n- Set this to your app. E.g., when running locally set it to http://localhost:8080. When running the app on GCP. set it to https://myapp.appsport.com\n\ninvalid_boat_id\n- Set it to a value that's not an ID of any boat in your project. I have set it to 1 and that should work for you as well.\n- \n\ninvalid_slip_id\n- Set it to a value that's not an ID of any slip in your porject. I have set it to 1 and that should work for you as well.\n",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [

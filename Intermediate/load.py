@@ -2,7 +2,6 @@ from google.cloud import datastore
 from flask import Blueprint, request, Response, jsonify, abort
 import json
 
-app = Flask(__name__)
 client = datastore.Client()
 
 bp = Blueprint('load', __name__, url_prefix='/loads')
@@ -23,7 +22,7 @@ def get_all_loads(request):
     for e in results:
         e["id"] = e.key.id
         e["self"] = request.base_url + '/' + str(e.key.id)
-    output = {"guests": results}
+    output = {"loads": results}
     if next_url:
         output["next"] = next_url
     return output
@@ -56,11 +55,13 @@ def delete_load(load_id):
     result = client.get(key=load_key)
     if result is not None:
         client.delete(load_key)
-        boat = result[carrier]
+        boat = result['carrier']
         if boat is not None:
             boat_key = client.key('Boat', int(boat.id))
             boat_get = client.get(key=boat_key)
-            boat_get['loads'].remove(int(load_id))
+            for load in boat_get['loads']:
+                if load.id == load_id:
+                    boat_get['loads'].remove(load)
             client.put(boat_get)
         return 204
     else:
