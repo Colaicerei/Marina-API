@@ -20,7 +20,7 @@ def get_all_boats(base_url):
     else:
         next_url = None
     for e in results:
-        e["id"] = e.key.id
+        e["id"] = str(e.key.id)
         e["self"] = base_url + '/' + str(e.key.id)
     output = {"boats": results}
     if next_url:
@@ -100,18 +100,19 @@ def remove_load_from_boat(load_id, boat_id):
     load = client.get(key=load_key)
     boat = client.get(key=boat_key)
     # check if both load and boat exist and load is assigned to the boat
-    if load is not None and boat is not None: #and str(load["carrier"].id)==boat_id:
-        load.update({
-            "carrier": None
-        })
-        client.put(load)
-        for load in boat['loads']:
-            if load.id == load_id:
-                boat['loads'].remove(load)
-        client.put(boat)
-        return 204
-    else:
+    if load is None or boat is None or load["carrier"] is None or str(load["carrier"]["id"])!=boat_id:
         return 404
+    load.update({
+        "carrier": None
+    })
+    client.put(load)
+    for load in boat['loads']:
+        print(load["id"])
+        if load["id"] == load_id:
+            boat['loads'].remove(load)
+    client.put(boat)
+    return 204
+
 
 # create a new boat via POST or view all boats via GET
 @ bp.route('', methods=['POST', 'GET'])
@@ -122,9 +123,9 @@ def boat_list_add():
             error_message = {"Error": "The request object is missing at least one of the required attributes"}
             return (error_message, 400)
         new_boat = add_boat(content["name"], content["type"], int(content["length"]))
-        boat_id = new_boat.key.id
+        boat_id = str(new_boat.key.id)
         new_boat["id"] = boat_id
-        new_boat["self"] = request.base_url + '/' + str(boat_id)
+        new_boat["self"] = request.base_url + '/' + boat_id
         return Response(json.dumps(new_boat), status=201, mimetype='application/json')
     elif request.method == 'GET':
         boat_list = get_all_boats(request.base_url)
@@ -178,12 +179,26 @@ def manage_boat_load(load_id, boat_id):
 def get_loads_at_boat(boat_id):
     boat_key = client.key('Boat', int(boat_id))
     boat = client.get(key=boat_key)
+    if boat is None:
+        error_message = {"Error": "No boat with this boat_id exists"}
+        return (error_message, 404)
     load_list  = []
     if 'loads' in boat.keys():
-        for load_id in boat['loads']:
-            load_key = client.key('Load', int(load_id))
-            load_list.append(load_key)
-        return json.dumps(client.get_multi(load_list))
+        #for l in boat['loads']:
+        #    load_key = client.key('Load', int(l["id"]))
+        #    load_list.append(load_key)
+        #return json.dumps(client.get_multi(load_list))
+        for l in boat['loads']:
+            load_key = client.key('Load', int(l["id"]))
+            load = client.get(key=load_key)
+            load_list.append({
+                'id': str(load.id),
+                'weight': load['weight'],
+                'content': load['content'],
+                'delivery_date': load['delivery_date'],
+                'self': request.url_root + '/loads/' + str(load.id)
+            })
+        return json.dumps(load_list)
     else:
         return json.dumps([])
 

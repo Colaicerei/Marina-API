@@ -20,7 +20,7 @@ def get_all_loads(request):
     else:
         next_url = None
     for e in results:
-        e["id"] = e.key.id
+        e["id"] = str(e.key.id)
         e["self"] = request.base_url + '/' + str(e.key.id)
     output = {"loads": results}
     if next_url:
@@ -57,10 +57,10 @@ def delete_load(load_id):
         client.delete(load_key)
         boat = result['carrier']
         if boat is not None:
-            boat_key = client.key('Boat', int(boat.id))
+            boat_key = client.key('Boat', int(boat["id"]))
             boat_get = client.get(key=boat_key)
             for load in boat_get['loads']:
-                if load.id == load_id:
+                if load["id"] == load_id:
                     boat_get['loads'].remove(load)
             client.put(boat_get)
         return 204
@@ -76,9 +76,9 @@ def load_list_add():
             error_message = {"Error": "The request object is missing at least one of the required attributes"}
             return (error_message, 400)
         new_load = add_load(content["weight"], content["content"], content["delivery_date"])
-        load_id = new_load.key.id
+        load_id = str(new_load.key.id)
         new_load["id"] = load_id
-        new_load["self"] = request.base_url + '/' + str(load_id)
+        new_load["self"] = request.base_url + '/' + load_id
         return Response(json.dumps(new_load), status=201, mimetype='application/json')
     elif request.method == 'GET':
         load_list = get_all_loads(request)
