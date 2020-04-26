@@ -27,7 +27,7 @@ def get_all_loads(request):
             boat_key = client.key("Boat", int(carrier["id"]))
             boat = client.get(key=boat_key)
             if boat is not None:
-                boat["self"] = request.url_root + '/boats/' + str(boat.id)
+                e["carrier"]["self"] = request.url_root + '/boats/' + str(boat.id)
     output = {"loads": results}
     if next_url:
         output["next"] = next_url
@@ -57,7 +57,7 @@ def get_load(load_id, base_url):
             boat_key = client.key("Boat", int(carrier["id"]))
             boat = client.get(key=boat_key)
             if boat is not None:
-                boat["self"] = request.url_root + '/boats/' + str(boat.id)
+                result["carrier"]["self"] = request.url_root + '/boats/' + str(boat.id)
     return result
 
 

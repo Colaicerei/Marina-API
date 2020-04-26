@@ -22,12 +22,12 @@ def get_all_boats(request):
     for e in results:
         e["id"] = str(e.key.id)
         e["self"] = request.base_url + '/' + str(e.key.id)
-        if not ['loads']:
+        if e['loads']:
             for l in e["loads"]:
                 load_key = client.key("Load", int(l["id"]))
                 load = client.get(key=load_key)
                 if load is not None:
-                    e["load"]["self"] = request.url_root + '/loads/' + str(load.id)
+                    l["self"] = request.url_root + '/loads/' + str(load.id)
     output = {"boats": results}
     if next_url:
         output["next"] = next_url
@@ -53,7 +53,7 @@ def get_boat(boat_id, base_url):
         result["id"] = boat_id
         result["self"] = base_url
         loads = result["loads"]
-        if not loads:
+        if loads:
             for l in loads:
                 load_key = client.key("Load", int(l["id"]))
                 load = client.get(key=load_key)
