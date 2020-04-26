@@ -7,7 +7,7 @@ client = datastore.Client()
 bp = Blueprint('boat', __name__, url_prefix='/boats')
 
 # get all existing boats
-def get_all_boats(base_url):
+def get_all_boats(request):
     query = client.query(kind='Boat')
     q_limit = int(request.args.get('limit', '3'))
     q_offset = int(request.args.get('offset', '0'))
@@ -21,7 +21,13 @@ def get_all_boats(base_url):
         next_url = None
     for e in results:
         e["id"] = str(e.key.id)
-        e["self"] = base_url + '/' + str(e.key.id)
+        e["self"] = request.base_url + '/' + str(e.key.id)
+        if not ['loads']:
+            for l in e["loads"]:
+                load_key = client.key("Load", int(l["id"]))
+                load = client.get(key=load_key)
+                if load is not None:
+                    e["load"]["self"] = request.url_root + '/loads/' + str(load.id)
     output = {"boats": results}
     if next_url:
         output["next"] = next_url
@@ -46,6 +52,13 @@ def get_boat(boat_id, base_url):
     if result is not None:
         result["id"] = boat_id
         result["self"] = base_url
+        loads = result["loads"]
+        if not loads:
+            for l in loads:
+                load_key = client.key("Load", int(l["id"]))
+                load = client.get(key=load_key)
+                if load is not None:
+                    l["self"] = request.url_root + '/loads/' + str(load.id)
     return result
 
 # delete boat and remove it from loads assigned to it
@@ -79,14 +92,12 @@ def add_load_to_boat(host, load_id, boat_id):
     elif load['carrier'] is not None:
         return 403
     # update list of loads in boat
-    load_brief = {'id':str(load.id), 'self': host + '/loads/' + str(load.id)}
+    load_brief = {'id':str(load.id)}
     boat['loads'].append(load_brief)
     client.put(boat)
     # update carrier information in load
-    boat_brief = {}
-    boat_brief.update({'id': str(boat.id)})
-    boat_brief.update({'name': boat['name']})
-    boat_brief.update({'self': host + '/boats/' + str(boat.id)})
+    boat_brief = {'id': str(boat.id), 'name': boat['name']}
+    # boat_brief.update({'self': host + '/boats/' + str(boat.id)})
     load.update({
         "carrier": boat_brief
     })
@@ -128,7 +139,7 @@ def boat_list_add():
         new_boat["self"] = request.base_url + '/' + boat_id
         return Response(json.dumps(new_boat), status=201, mimetype='application/json')
     elif request.method == 'GET':
-        boat_list = get_all_boats(request.base_url)
+        boat_list = get_all_boats(request)
         return Response(json.dumps(boat_list), status=200, mimetype='application/json')
     else:
         return 'Method not recogonized'
