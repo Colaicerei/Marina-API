@@ -164,7 +164,7 @@ def boat_get_edit(boat_id):
         return 'Method not recogonized'
 
 # assign or un-assign a load to boat
-@bp.route('/<boat_id>/<load_id>', methods=['PUT', 'DELETE'])
+@bp.route('/<boat_id>/loads/<load_id>', methods=['PUT', 'DELETE'])
 def manage_boat_load(load_id, boat_id):
     if request.method == 'PUT':
         status = add_load_to_boat(request.url_root, load_id, boat_id)
