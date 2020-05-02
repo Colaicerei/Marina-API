@@ -22,6 +22,16 @@ def check_name_exist(name):
             return True
     return False
 
+# check if name already used by other boats
+def name_unavailable(name, boat_id):
+    query = client.query(kind='Boat')
+    results = list(query.fetch())
+    for e in results:
+        print(e.id)
+        if e["name"] == name and e.id != int(boat_id):
+            return True
+    return False
+
 def content_validation(content):
     valid = True
     if 'name' in content:

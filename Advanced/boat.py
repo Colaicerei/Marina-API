@@ -32,19 +32,19 @@ def get_boat(boat_id, base_url):
 def edit_boat(content, boat_id):
     boat_key = client.key('Boat', int(boat_id))
     boat = client.get(key=boat_key)
-    if 'name' in content:
-        boat_name = content["name"]
-    else:
-        boat_name = boat["name"]
-    if 'type' in content:
-        boat_type = content["type"]
-    else:
-        boat_type = boat["type"]
-    if 'length' in content:
-        boat_length = int(content["length"])
-    else:
-        boat_length = boat["length"]
     if boat is not None:
+        if 'name' in content:
+            boat_name = content["name"]
+        else:
+            boat_name = boat["name"]
+        if 'type' in content:
+            boat_type = content["type"]
+        else:
+            boat_type = boat["type"]
+        if 'length' in content:
+            boat_length = int(content["length"])
+        else:
+            boat_length = boat["length"]
         boat.update({
             'name': boat_name,
             'type': boat_type,
@@ -79,7 +79,7 @@ def manage_boats():
             error_msg = {"Error": "The request had invalid content"}
             return (error_msg, 400)
         if check_name_exist(request_content["name"]):
-            error_msg = {"Error": "The name of boat is already taken"}
+            error_msg = {"Error": "The name of boat is not available"}
             return (error_msg, 403)
         new_boat = add_boat(request_content["name"], request_content["type"], int(request_content["length"]))
         boat_id = str(new_boat.key.id)
@@ -134,6 +134,12 @@ def boat_get_delete(boat_id):
 @bp.route('/<boat_id>', methods=['PUT', 'PATCH'])
 def boat_edit(boat_id):
     request_content = json.loads(request.data) or {}
+    if 'application/json'  not in request.accept_mimetypes:
+        error_msg = {"Error": "Only JSON is supported as returned content type"}
+        return (error_msg, 406)
+    if 'id' in request_content:
+        error_message = {"Error": "Updating ID is not allowed"}
+        return (error_message, 403)
     # Fully edit the boat
     if request.method == 'PUT':
         if 'name' not in request_content or 'type' not in request_content or 'length' not in request_content:
@@ -142,16 +148,18 @@ def boat_edit(boat_id):
         if not content_validation(request_content):
             error_msg = {"Error": "The request had invalid content"}
             return (error_msg, 400)
-        if check_name_exist(request_content["name"]):
-            error_msg = {"Error": "The name of boat is already taken"}
+        if name_unavailable(request_content["name"], boat_id):
+            error_msg = {"Error": "The name of boat is not available"}
             return (error_msg, 403)
         updated_boat = edit_boat(request_content, boat_id)
         if updated_boat is None:
             error_message = {"Error": "No boat with this boat_id exists"}
             return (error_message, 404)
-        updated_boat["id"] = boat_id
-        updated_boat["self"] = request.base_url
-        return Response(json.dumps(updated_boat), status=200, mimetype='application/json')
+        updated_url = request.base_url
+        response = make_response('')
+        response.headers.set('Location', updated_url)
+        response.status_code = 303
+        return response
 
     # partially edit the boat:
     elif request.method == 'PATCH':
@@ -162,8 +170,8 @@ def boat_edit(boat_id):
         if not content_validation(request_content):
             error_msg = {"Error": "The request had invalid content"}
             return (error_msg, 400)
-        if 'name' in request_content and check_name_exist(request_content["name"]):
-            error_msg = {"Error": "The name of boat is already taken"}
+        if 'name' in request_content and name_unavailable(request_content["name"], boat_id):
+            error_msg = {"Error": "The name of boat is not available"}
             return (error_msg, 403)
         updated_boat = edit_boat(request_content, boat_id)
         if updated_boat is None:
