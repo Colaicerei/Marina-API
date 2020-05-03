@@ -14,7 +14,7 @@ def add_boat(boat_name, boat_type, boat_length):
     new_boat.update({
         'name': boat_name,
         'type': boat_type,
-        'length': boat_length,
+        'length': boat_length
     })
     client.put(new_boat)
     return new_boat
@@ -76,7 +76,7 @@ def manage_boats():
             error_msg = {"Error": "The request object is missing at least one of the required attributes"}
             return (error_msg, 400)
         if not content_validation(request_content):
-            error_msg = {"Error": "The request had invalid content"}
+            error_msg = {"Error": "Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000"}
             return (error_msg, 400)
         if check_name_exist(request_content["name"]):
             error_msg = {"Error": "The name of boat is not available"}
@@ -146,7 +146,7 @@ def boat_edit(boat_id):
             error_message = {"Error": "The request object is missing at least one of the required attributes"}
             return (error_message, 400)
         if not content_validation(request_content):
-            error_msg = {"Error": "The request had invalid content"}
+            error_msg = {"Error": "Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000"}
             return (error_msg, 400)
         if name_unavailable(request_content["name"], boat_id):
             error_msg = {"Error": "The name of boat is not available"}
@@ -168,7 +168,7 @@ def boat_edit(boat_id):
             error_message = {"Error": "The request object needs at least one of the attributes"}
             return (error_message, 400)
         if not content_validation(request_content):
-            error_msg = {"Error": "The request had invalid content"}
+            error_msg = {"Error": "Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000"}
             return (error_msg, 400)
         if 'name' in request_content and name_unavailable(request_content["name"], boat_id):
             error_msg = {"Error": "The name of boat is not available"}

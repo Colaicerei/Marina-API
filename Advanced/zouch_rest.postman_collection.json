@@ -1,0 +1,2276 @@
+{
+	"info": {
+		"_postman_id": "17c72e93-286d-400f-a426-9a0022257554",
+		"name": "HW5-Zouch",
+		"description": "This collection tests the API specification given for Assignment 3.\nIn order to run this collection, you need an environment which has the following 3 environment variables pre-defined:\n\napp_url\n- Set this to your app. E.g., when running locally set it to http://localhost:8080. When running the app on GCP. set it to https://myapp.appsport.com\n\ninvalid_boat_id\n- Set it to a value that's not an ID of any boat in your project. I have set it to 1 and that should work for you as well.\n- \n\ninvalid_slip_id\n- Set it to a value that's not an ID of any slip in your porject. I have set it to 1 and that should work for you as well.\n",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "add boat 201",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c3909730-e21c-410c-9600-0074bed56aa0",
+						"exec": [
+							"pm.environment.set(\"boat_id\", pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"Odyssey\");",
+							"    pm.expect(pm.response.json()[\"type\"]).to.eq(\"Yatch\");",
+							"    pm.expect(pm.response.json()[\"length\"]).to.eq(99);",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey\",\r\n  \"type\": \"Yatch\",\r\n  \"length\": \"99\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add another boat(extra attribute) 201",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "90f6b039-26c2-4330-864e-ae97b5354010",
+						"exec": [
+							"pm.environment.set(\"boat2_id\", pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"Odyssey II\");",
+							"    pm.expect(pm.response.json()[\"type\"]).to.eq(\"Cruise\");",
+							"    pm.expect(pm.response.json()[\"length\"]).to.eq(999);",
+							"    pm.expect(pm.response.json()[\"color\"]).to.eq(undefined);",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Odyssey II\",\r\n    \"type\": \"Cruise\",\r\n    \"length\": \"999\",\r\n    \"color\": \"Red\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with missing attributes 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e7fb0550-3eb8-4031-81f7-0959d27363f5",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object is missing at least one of the required attributes\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey\",\r\n  \"type\": \"Yatch\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with invalid length 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5c256917-2a99-4864-84a7-c242720f6942",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey\",\r\n  \"type\": \"Yatch\",\r\n  \"length\": \"99a\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with outranged length 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5e512d6e-60e9-4bab-ac89-79b9e0d980d3",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey\",\r\n  \"type\": \"Yatch\",\r\n  \"length\": \"1\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with  invalid name 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f68d990f-f67c-4cdc-8007-581e197a6796",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey I \",\r\n  \"type\": \"Yatch\",\r\n  \"length\": \"2\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with outsized name 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c50730c8-24cc-4b92-b5b5-4e2e8ee645aa",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey12345678901234\",\r\n  \"type\": \"Yatch\",\r\n  \"length\": \"2\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with invalid type 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "99e5ad69-2df2-405a-a44b-d7857847da68",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey123\",\r\n  \"type\": \"Yatch@\",\r\n  \"length\": \"2\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with outsized type 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9bdc0648-0e79-49db-aae1-11cb1b9bff2b",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey123\",\r\n  \"type\": \"Ya\",\r\n  \"length\": \"2\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with unavailable name 403",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "74b3a401-74bd-42f7-b6e8-6a6754079c8b",
+						"exec": [
+							"pm.test(\"403 status code\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"403 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The name of boat is not available\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Odyssey\",\r\n    \"type\": \"Cruise\",\r\n    \"length\": 999\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with invalid accept types 406",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cb87dcc3-2adc-49b9-9a8b-e071f9334ea5",
+						"exec": [
+							"pm.test(\"406 status code\", function () {",
+							"    pm.response.to.have.status(406);",
+							"});",
+							"",
+							"pm.test(\"406 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Only JSON is supported as returned content type\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accpet",
+						"value": "text/html, application/xhtml+xml, application/xml",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Odyssey\",\r\n    \"type\": \"Cruise\",\r\n    \"length\": 999\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get boat JSON 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9d5b5689-bfaa-469a-9040-126379d71956",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"Odyssey\");",
+							"    pm.expect(pm.response.json()[\"type\"]).to.eq(\"Yatch\");",
+							"    pm.expect(pm.response.json()[\"length\"]).to.eq(99);",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/JSON",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get boat HTML 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f04122ea-f527-4c4c-b0c9-b0659f6418df",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "text/html "
+					}
+				],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get boat with invalid ID 404",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d2c4b5dd-7788-4f85-9354-4f80029f4f18",
+						"exec": [
+							"pm.test(\"404 not found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"",
+							"pm.test(\"404 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No boat with this boat_id exists\");",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "text/html ",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{app_url}}/boats/{{invalid_boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{invalid_boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get boat with invalid type 406",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a0c5cfcc-dec7-4cbc-8d5d-e3c32894dee8",
+						"exec": [
+							"pm.test(\"406  Not Acceptable\", function () {",
+							"    pm.response.to.have.status(406);",
+							"});",
+							"",
+							"",
+							"pm.test(\"406 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Only JSON and HTML are supported as returned content type\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xhtml+xml, application/xml,text/css",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch edit boat 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0726aba7-4ab7-40df-bc28-22a622225109",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"Odyssey\");",
+							"    pm.expect(pm.response.json()[\"type\"]).to.eq(\"Mega Yatch\");",
+							"    pm.expect(pm.response.json()[\"length\"]).to.eq(200);",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"type\": \"Mega Yatch\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch edit boat with extra attribute 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "988990d3-4cf0-433c-9bfc-ae9cb0e5ef7e",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"Odyssey\");",
+							"    pm.expect(pm.response.json()[\"type\"]).to.eq(\"Mega Yatch\");",
+							"    pm.expect(pm.response.json()[\"length\"]).to.eq(200);",
+							"    pm.expect(pm.response.json()[\"color\"]).to.eq(undefined);",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"type\": \"Mega Yatch\",\r\n  \"length\": 200,\r\n  \"color\": \"White\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch edit boat with unavailable name 403",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a9b86495-75d7-40ca-a509-953ba2369507",
+						"exec": [
+							"pm.test(\"403 status code\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"403 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The name of boat is not available\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey II\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch edit boat ID 403",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2195847a-cf36-40a0-b6bb-25ea1f3952a3",
+						"exec": [
+							"pm.test(\"403 status code\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"403 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Updating ID is not allowed\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 123\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch boat with no attributes 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "43449e20-8308-4a6e-a3f5-37bdcca3777e",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object needs at least one of the attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch boat with invalid name 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0fff8750-3394-4fca-a9ee-be55eae249cd",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \" Odyssey I\",\r\n  \"length\": \"2\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch boat with oversized name 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7594142d-8f26-4266-9b52-9f6cf9f7ea9d",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"O123456789 1234567890\",\r\n  \"length\": \"2\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch boat with invalid type 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30673baa-369c-43f4-b7e4-b58e0493e49d",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"type\": \" Yatch\",\r\n  \"length\": \"2\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch boat with oversized type 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e5a2efde-d487-417f-9848-b958f5307db7",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"type\": \"Yatch12345678912345678\",\r\n  \"length\": \"2\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch boat with invalid length 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c0326118-5c99-4d20-8e63-84a5adb90f46",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"type\": \"Yatch\",\r\n  \"length\": \"2.0\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch boat with outrange length 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "389080f2-2fdb-4592-a2e5-bd6dbb8e9b33",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"type\": \"Yatch\",\r\n  \"length\": \"1\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch boat with invalid id 404",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "47f971d0-8d65-45e8-84ba-de3164238a86",
+						"exec": [
+							"pm.test(\"404 not found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"",
+							"pm.test(\"404 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No boat with this boat_id exists\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"dummy\",\r\n   \"type\": \"Mega Yatch\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{invalid_boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{invalid_boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch boat with invalid header 406",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fa294be0-045a-476e-9e70-2b286f3ec3f5",
+						"exec": [
+							"pm.test(\"406  Not Acceptable\", function () {",
+							"    pm.response.to.have.status(406);",
+							"});",
+							"",
+							"",
+							"pm.test(\"406 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Only JSON is supported as returned content type\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "text/html",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"dummy\",\r\n   \"type\": \"Mega Yatch\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fully edit boat 303",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3ea80384-09fc-4cab-81e4-83c20ee0120f",
+						"exec": [
+							"pm.test(\"303 status code\", function () {",
+							"    pm.response.to.have.status(303);",
+							"});",
+							"",
+							"pm.test(\"303 see other\", function () {",
+							"     const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.environment.get(\"boat_id\");",
+							"     pm.response.to.have.header(\"Location\");",
+							"     //pm.expect(pm.response.header.Location.to.eq(self_url));",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey updated\",\r\n  \"type\": \"Mega Yatch\",\r\n  \"length\": \"200\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fully edit boat with unavailable name 403",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "70a202e0-33fe-44e3-b240-98cb27a56f5e",
+						"exec": [
+							"pm.test(\"403 status code\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"403 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The name of boat is not available\");",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey II\",\r\n  \"type\": \"Mega Yatch\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fully edit boat ID 403",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "930c05cd-a06e-4d8f-bee6-e8930c5bd18b",
+						"exec": [
+							"pm.test(\"403 status code\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"403 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Updating ID is not allowed\");",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 123,\r\n  \"name\": \"Odyssey\",\r\n  \"type\": \"Mega Yatch\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fully edit boat with extra attribute 303",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "448542a9-ce86-4838-967a-62c7bfd404ed",
+						"exec": [
+							"pm.test(\"303 status code\", function () {",
+							"    pm.response.to.have.status(303);",
+							"});",
+							"",
+							"pm.test(\"303 see other\", function () {",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.environment.get(\"boat_id\");",
+							"    pm.response.to.have.header(\"Location\");",
+							"    //pm.expect(pm.response.header.Location.to.eq(self_url));",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey update\",\r\n  \"type\": \"Mega Yatch\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put edit boat with missing attribute 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3194c9a2-b6d2-435d-8061-1fafc5c6bf5c",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object is missing at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey II\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put edit boat with invalid name 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "213bc531-c82c-45ec-ba2d-d04ec3f78444",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"...Odyssey II\",\r\n  \"type\": \"warship\",\r\n  \"length\": \"200\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put edit boat with outsized name 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "46de6a0c-7afe-4680-b587-b0a05fcb0460",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"...Odyssey II\",\r\n  \"type\": \"warship\",\r\n  \"length\": \"200\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put edit boat with invalid type 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "501b54df-e293-4982-9167-d44121f3ba32",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"...Odyssey II\",\r\n  \"type\": \"warship\",\r\n  \"length\": \"200\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put edit boat with outsized type 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "09d338ca-7267-426e-9968-8be080799d3a",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey updated\",\r\n  \"type\": \"w\",\r\n  \"length\": \"200\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put edit boat with invalid length 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e9fae321-261c-461e-a72c-9d6f96920a47",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey updated\",\r\n  \"type\": \"warship\",\r\n  \"length\": \"-200\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put edit boat with outrange length 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0c44c371-fbfa-49e3-807f-d76e6b90601a",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Name or type should be 3 to 20 characters with only numbers, alphabets and spaces in between, length must be integer between 2 and 10000\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey updated\",\r\n  \"type\": \"warship\",\r\n  \"length\": \"0\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put edit boat with invalid id 404",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3e09a052-cf93-43aa-9492-07d1a8383e68",
+						"exec": [
+							"pm.test(\"404 not found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"",
+							"pm.test(\"404 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No boat with this boat_id exists\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"dummy\",\r\n   \"type\": \"Mega Yatch\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{invalid_boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{invalid_boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put edit boat with invalid header 406",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9d707963-170f-4096-8b90-c341897085ba",
+						"exec": [
+							"pm.test(\"406  Not Acceptable\", function () {",
+							"    pm.response.to.have.status(406);",
+							"});",
+							"",
+							"",
+							"pm.test(\"406 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Only JSON is supported as returned content type\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "text/html",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"dummy\",\r\n   \"type\": \"Mega Yatch\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put all boats 405",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "28936167-15b2-4523-a2d9-ddfe2f3d6d47",
+						"exec": [
+							"pm.test(\"405 status code\", function () {",
+							"    pm.response.to.have.status(405);",
+							"});",
+							"",
+							"",
+							"pm.test(\"405 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Editing all boats is not allowed\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat 204",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "aeef19cb-f1d3-4bb0-80b6-61703bfd232f",
+						"exec": [
+							"pm.test(\"204 no content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat2 204",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "27d6ab61-a860-4026-84f4-f704eb45cef9",
+						"exec": [
+							"pm.test(\"204 no content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat2_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat2_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat with invalid id 404",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3b33297a-49a3-4f3e-b224-e66e0bb52b36",
+						"exec": [
+							"pm.test(\"404 not found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"",
+							"pm.test(\"404 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No boat with this boat_id exists\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/{{invalid_boat_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{invalid_boat_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete all boats 405",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7687748d-5e85-40ee-bc94-038c60941e00",
+						"exec": [
+							"pm.test(\"405 status code\", function () {",
+							"    pm.response.to.have.status(405);",
+							"});",
+							"",
+							"",
+							"pm.test(\"405 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Deleting all boats is not allowed\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "6176a80b-a761-42e5-86b3-4a3a384eb05e",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "49076a25-6c0b-4b11-a5bd-a430c5121a67",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
