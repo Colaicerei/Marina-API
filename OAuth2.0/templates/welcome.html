@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+  <title>Welcome</title>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+<h1>Cloud Development HW6 OAuth 2.0 - Welcome</h1>
+
+<div>
+  <p>Hello, please click the below link for authentication, and you will be redirect to a webpage showing your name.</p>
+  <p>Pleased be noted that by authenticating your are granting this API access to your email, profile and openid.</p>
+  <a href="{{ place }}"><input type="button" class="" value="Authentication" /></a>
+</div>
+
+<div id="firebaseui-auth-container"></div>
+
+<button id="sign-out" hidden=true>Sign Out</button>
+
+</body>
+</html>

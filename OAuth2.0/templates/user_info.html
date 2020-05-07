@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+  <title>User Info</title>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>Cloud Development HW6 OAuth 2.0</h1>
+  <h2>User info:</h2>
+  <p> Hello, below is the information that retrieved from your profile</p>
+  {% if user_data %}
+    <dl>
+      <dt>First Name</dt><dd>{{ user_data['first_name'] }}</dd>
+      <dt>Last_Name</dt><dd>{{ user_data['last_name'] }}</dd>
+      <dt>State</dt><dd>{{ user_data['secret_state'] }}</dd>
+    </dl>
+  {% elif error_message %}
+    <p>Error: {{ error_message }}</p>
+  {% endif %}
+</body>
+</html>
