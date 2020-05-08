@@ -2,22 +2,47 @@
 <html>
 <head>
   <title>Welcome</title>
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
-  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+      window.addEventListener('load', (event) => {
+          document.getElementById('sign-in').onclick = function () {
+              window.location.href = '/auth';
+          };
+      });
+  </script>
+  <style>
+    body {
+      font-family: "helvetica", sans-serif;
+      text-align: center;
+    }
+
+    .login-button {
+      background-color: blue;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+    }
+  </style>
+
+  <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
 </head>
 
 <body>
 <h1>Cloud Development HW6 OAuth 2.0 - Welcome</h1>
 
 <div>
-  <p>Hello, please click the below link for authentication, and you will be redirect to a webpage showing your name.</p>
+  <p>Hello, please click the below button to sign in, and you will be redirected to a page showing your name.</p>
   <p>Pleased be noted that by authenticating your are granting this API access to your email, profile and openid.</p>
-  <a href="{{ place }}"><input type="button" class="" value="Authentication" /></a>
+  <button id="sign-in" class="login-button">Sign In with Google</button>
 </div>
-
-<div id="firebaseui-auth-container"></div>
-
-<button id="sign-out" hidden=true>Sign Out</button>
+<div>
+  {% if error_message %}
+  <p>Error: {{ error_message }}</p>
+  {% endif %}
+</div>
 
 </body>
 </html>
