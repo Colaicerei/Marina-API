@@ -8,6 +8,16 @@
               window.location.href = '/auth';
           };
       });
+      window.addEventListener('load', (event) => {
+          document.getElementById('sign-out').onclick = function () {
+              window.location.href = '/logout';
+          };
+      });
+      window.addEventListener('load', (event) => {
+          document.getElementById('view-profile').onclick = function () {
+              window.location.href = '/user_info';
+          };
+      });
   </script>
   <style>
     body {
@@ -15,7 +25,7 @@
       text-align: center;
     }
 
-    .login-button {
+    .button {
       background-color: blue;
       border: none;
       color: white;
@@ -26,7 +36,6 @@
       font-size: 16px;
     }
   </style>
-
   <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
 </head>
 
@@ -34,13 +43,18 @@
 <h1>Cloud Development HW6 OAuth 2.0 - Welcome</h1>
 
 <div>
-  <p>Hello, please click the below button to sign in, and you will be redirected to a page showing your name.</p>
+  <p>Hello, please sign in with google, and you will be redirected to a page showing your name.</p>
   <p>Pleased be noted that by authenticating your are granting this API access to your email, profile and openid.</p>
-  <button id="sign-in" class="login-button">Sign In with Google</button>
+  <button id="sign-in" class="button">Sign In with Google</button>
 </div>
 <div>
-  {% if error_message %}
-  <p>Error: {{ error_message }}</p>
+  {% if message %}
+  <p>{{ message }}</p>
+  {% endif %}
+  {% if name %}
+  <p>You are logged in as {{ name }}, view your profile or log out:</p>
+  <button id="view-profile">View Profile</button>
+  <button id="sign-out">Sign Out</button>
   {% endif %}
 </div>
 

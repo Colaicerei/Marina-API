@@ -2,8 +2,14 @@
 <html>
 <head>
   <title>User Info</title>
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
-  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+      window.addEventListener('load', (event) => {
+          document.getElementById('sign-out').onclick = function () {
+              window.location.href = '/logout';
+          };
+      });
+  </script>
+  <link type="text/css" rel="stylesheet" href="../static/style.css">
 </head>
 <body>
   <h1>Cloud Development HW6 OAuth 2.0 - User Info</h1>
@@ -15,5 +21,7 @@
   {% if state %}
       <p>State is: {{ state }}</p>
   {% endif %}
+
+  <button id="sign-out" class="button">Sign Out</button>
 </body>
 </html>
