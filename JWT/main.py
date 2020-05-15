@@ -6,7 +6,7 @@ from google.oauth2 import id_token
 from google.auth import crypt
 from google.auth import jwt
 from google.auth.transport import requests
-from boat import *
+import boat
 import secrets
 
 # This disables the requirement to use HTTPS so that you can test locally.
@@ -15,18 +15,30 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 #os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 
 app = Flask(__name__)
-#app.register_blueprint(boat.bp)
+app.register_blueprint(boat.bp)
 client = datastore.Client()
 app.secret_key = 'super secret 8888'
 
 # These should be copied from an OAuth2 Credential section at
 # https://console.cloud.google.com/apis/credentials
-client_id = '1026701465259-a0p8dvblmmvebfvnfj0gu222hb2osrq4.apps.googleusercontent.com'
-client_secret = 'cGgwAwQnrj3dGmvwJSyHhG7G'
-redirect_uri = 'https://hw7-zouch000.appspot.com/oauth'
+#client_id = '1026701465259-a0p8dvblmmvebfvnfj0gu222hb2osrq4.apps.googleusercontent.com'
+client_id = '977494860444-rcg8gihn0ltj4gktplao0j2k551ilu4b.apps.googleusercontent.com'
+#client_secret = 'cGgwAwQnrj3dGmvwJSyHhG7G'
+client_secret = 'whK4cm9sarWhvsyBAR7romAK'
+#redirect_uri = 'http://localhost:8080/oauth'
+redirect_uri = 'https://hw7server-test.appspot.com/oauth'
 scope = 'openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri,
                           scope=scope)
+# get all existing boats
+def get_owner_boats(owner):
+    query = client.query(kind='Boat')
+    query.add_filter('owner', '=', owner)
+    #query.order = ['-']
+    results = list(query.fetch())
+    for e in results:
+        e["id"] = str(e.key.id)
+    return results
 
 # This link will redirect users to begin the OAuth flow with Google
 @app.route('/')
@@ -83,36 +95,6 @@ def logout():
     session.pop('email', None)
     return redirect(url_for('index',message='You are logged out'))
 
-# create a new boat via POST or view all boats via GET
-@ app.route('/boats', methods=['POST', 'GET'])
-def manage_boats():
-    # create new boat
-    if request.method == 'POST':
-        request_content = json.loads(request.data) or {}
-        if 'Authorization' not in request.headers:
-            error_msg = {"Error": "Missing JWT"}
-            return (error_msg, 401)
-        jwt = request.headers['Authorization'][7:]
-        req = requests.Request()
-        try:
-            id_info = id_token.verify_oauth2_token(
-                jwt, req, client_id)
-        except ValueError:
-            error_msg = {"Error": "Invalid JWT"}
-            return (error_msg, 401)
-        if id_info['iss'] != 'accounts.google.com':
-            raise ValueError('Wrong issuer.')
-        owner_id = id_info['sub']
-        new_boat = add_boat(request_content["name"], request_content["type"], int(request_content["length"]), owner_id)
-        boat_id = str(new_boat.key.id)
-        new_boat["id"] = boat_id
-        return Response(json.dumps(new_boat), status=201, mimetype='application/json')
-    elif request.method == 'GET':
-        boat_list = get_all_boats(request)
-        return Response(json.dumps(boat_list), status=200, mimetype='application/json')
-    else:
-        return 'Method not recogonized'
-
 # view all boats for given owner
 @app.route('/owners/<owner_id>/boats', methods=['GET'])
 def get_boats_by_owner(owner_id):
@@ -140,29 +122,7 @@ def get_boats_by_owner(owner_id):
     else:
         return 'Method not recogonized'
 
-# delete an existing boat, return 404 if boat not exists
-@app.route('/boats/<boat_id>', methods=['DELETE'])
-def boat_delete(boat_id):
-    # delete the boat
-    if request.method == 'DELETE':
-        if 'Authorization' not in request.headers:
-            error_msg = {"Error": "Missing JWT"}
-            return (error_msg, 401)
-        jwt = request.headers['Authorization'][7:]
-        req = requests.Request()
-        try:
-            id_info = id_token.verify_oauth2_token(
-                jwt, req, client_id)
-        except ValueError:
-            error_msg = {"Error": "Invalid JWT"}
-            return (error_msg, 401)
-        if id_info['iss'] != 'accounts.google.com':
-            raise ValueError('Wrong issuer.')
-        owner_id = id_info['sub']
-        response = delete_boat(boat_id, owner_id)
-        return response
-    else:
-        return 'Method not recogonized'
+
 
 @app.route('/verify-jwt')
 def verify():
