@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <title>User Info</title>
+  <script>
+      window.addEventListener('load', (event) => {
+          document.getElementById('sign-out').onclick = function () {
+              window.location.href = '/logout';
+          };
+      });
+  </script>
+  <link type="text/css" rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+  <h1>Cloud Development HW7 JWT - User Info</h1>
+  <h2>Hello, below is the information from your profile:</h2>
+  {% if email %}
+      <p>Your email is: {{ email }}</p>
+  {% endif %}
+  {% if jwt %}
+      <p>Your JWT is: {{ jwt }}</p>
+  {% endif %}
+
+  <button id="sign-out" class="button">Sign Out</button>
+</body>
+</html>
