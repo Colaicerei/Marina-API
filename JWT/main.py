@@ -12,6 +12,7 @@ import secrets
 # This disables the requirement to use HTTPS so that you can test locally.
 import os
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+#os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 
 app = Flask(__name__)
 #app.register_blueprint(boat.bp)
@@ -22,7 +23,7 @@ app.secret_key = 'super secret 8888'
 # https://console.cloud.google.com/apis/credentials
 client_id = '1026701465259-a0p8dvblmmvebfvnfj0gu222hb2osrq4.apps.googleusercontent.com'
 client_secret = 'cGgwAwQnrj3dGmvwJSyHhG7G'
-redirect_uri = 'http://127.0.0.1:8080/oauth'
+redirect_uri = 'https://hw7-zouch000.appspot.com/oauth'
 scope = 'openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri,
                           scope=scope)
@@ -134,7 +135,6 @@ def get_boats_by_owner(owner_id):
         if owner != owner_id:
             error_msg = {"Error": "JWT doesn't match the owner_id specified in the URL"}
             return (error_msg, 401)
-
         boats = get_owner_boats(owner)
         return Response(json.dumps(boats), status=200, mimetype='application/json')
     else:

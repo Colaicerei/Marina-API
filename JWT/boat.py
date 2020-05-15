@@ -1,6 +1,5 @@
 from google.cloud import datastore
 from flask import Blueprint, request, Response, make_response
-from json2html import *
 import json
 
 client = datastore.Client()
